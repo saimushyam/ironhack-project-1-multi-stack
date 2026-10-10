@@ -6,6 +6,26 @@ locals {
   selected_azs = slice(data.aws_availability_zones.available.names, 0, 2)
 }
 
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-2023.*-x86_64"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
 resource "aws_vpc" "main" {
 
   cidr_block           = var.vpc_cidr
@@ -327,5 +347,130 @@ resource "aws_lb_listener_rule" "result" {
     path_pattern {
       values = ["/result", "/result/*"]
     }
+  }
+}
+
+# IAM role assumed by EC2 instances
+resource "aws_iam_role" "ec2" {
+  name = "${var.project_name}-${var.environment}-ec2-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-ec2-role"
+  }
+}
+
+# Allow instances to be managed through AWS Systems Manager
+resource "aws_iam_role_policy_attachment" "ssm" {
+  role       = aws_iam_role.ec2.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+# Instance profile attaches the IAM role to EC2
+resource "aws_iam_instance_profile" "ec2" {
+  name = "${var.project_name}-${var.environment}-ec2-profile"
+  role = aws_iam_role.ec2.name
+}
+
+
+# Application server in Availability Zone 1
+resource "aws_instance" "app_1" {
+  ami                         = data.aws_ami.amazon_linux.id
+  instance_type               = var.instance_type
+  subnet_id                   = aws_subnet.public[0].id
+  vpc_security_group_ids      = [aws_security_group.app.id]
+  iam_instance_profile        = aws_iam_instance_profile.ec2.name
+  associate_public_ip_address = true
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-app-1"
+    Role        = "application"
+    Environment = var.environment
+  }
+}
+
+# Application server in Availability Zone 2
+resource "aws_instance" "app_2" {
+  ami                         = data.aws_ami.amazon_linux.id
+  instance_type               = var.instance_type
+  subnet_id                   = aws_subnet.public[1].id
+  vpc_security_group_ids      = [aws_security_group.app.id]
+  iam_instance_profile        = aws_iam_instance_profile.ec2.name
+  associate_public_ip_address = true
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-app-2"
+    Role        = "application"
+    Environment = var.environment
+  }
+}
+
+# Backend server in Availability Zone 1
+resource "aws_instance" "backend_1" {
+  ami                    = data.aws_ami.amazon_linux.id
+  instance_type          = var.instance_type
+  subnet_id              = aws_subnet.private[0].id
+  vpc_security_group_ids = [aws_security_group.backend.id]
+  iam_instance_profile   = aws_iam_instance_profile.ec2.name
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-backend-1"
+    Role        = "backend"
+    Environment = var.environment
+  }
+}
+
+# Backend server in Availability Zone 2
+resource "aws_instance" "backend_2" {
+  ami                    = data.aws_ami.amazon_linux.id
+  instance_type          = var.instance_type
+  subnet_id              = aws_subnet.private[1].id
+  vpc_security_group_ids = [aws_security_group.backend.id]
+  iam_instance_profile   = aws_iam_instance_profile.ec2.name
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-backend-2"
+    Role        = "backend"
+    Environment = var.environment
+  }
+}
+
+# Database server in Availability Zone 1
+resource "aws_instance" "database_1" {
+  ami                    = data.aws_ami.amazon_linux.id
+  instance_type          = var.instance_type
+  subnet_id              = aws_subnet.private[0].id
+  vpc_security_group_ids = [aws_security_group.database.id]
+  iam_instance_profile   = aws_iam_instance_profile.ec2.name
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-database-1"
+    Role        = "database"
+    Environment = var.environment
+  }
+}
+
+# Database server in Availability Zone 2
+resource "aws_instance" "database_2" {
+  ami                    = data.aws_ami.amazon_linux.id
+  instance_type          = var.instance_type
+  subnet_id              = aws_subnet.private[1].id
+  vpc_security_group_ids = [aws_security_group.database.id]
+  iam_instance_profile   = aws_iam_instance_profile.ec2.name
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-database-2"
+    Role        = "database"
+    Environment = var.environment
   }
 }
