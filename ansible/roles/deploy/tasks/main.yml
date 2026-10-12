@@ -1,40 +1,22 @@
-
 ---
-- name: Create application deployment directory
+- name: Create deployment directory
   become: true
   ansible.builtin.file:
     path: /opt/voting-app
     state: directory
     mode: "0755"
 
-- name: Copy application Compose configuration
+- name: Deploy tier-specific Compose configuration
   become: true
-  ansible.builtin.copy:
-    src: app-compose.yml
+  ansible.builtin.template:
+    src: "{{ 'app-compose.yml.j2' if 'app' in group_names else 'backend-compose.yml.j2' if 'backend' in group_names else 'database-compose.yml.j2' }}"
     dest: /opt/voting-app/compose.yml
-    mode: "0644"
-  when: "'app' in group_names"
+    mode: "0600"
+  no_log: true
 
-- name: Copy backend Compose configuration
-  become: true
-  ansible.builtin.copy:
-    src: backend-compose.yml
-    dest: /opt/voting-app/compose.yml
-    mode: "0644"
-  when: "'backend' in group_names"
-
-- name: Copy database Compose configuration
-  become: true
-  ansible.builtin.copy:
-    src: database-compose.yml
-    dest: /opt/voting-app/compose.yml
-    mode: "0644"
-  when: "'database' in group_names"
-
-- name: Start application containers
+- name: Start tier containers
   become: true
   ansible.builtin.command:
-    cmd: docker compose up -d
+    cmd: docker compose up -d --remove-orphans
     chdir: /opt/voting-app
   changed_when: true
-

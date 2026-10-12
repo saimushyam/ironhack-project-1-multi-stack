@@ -1,7 +1,18 @@
 ---
-- name: Configure application, backend, and database servers
-  hosts: all
-  become: false
+- name: Deploy database tier
+  hosts: database
+  roles:
+    - docker
+    - deploy
+
+- name: Deploy backend tier
+  hosts: backend
+  roles:
+    - docker
+    - deploy
+
+- name: Deploy application tier
+  hosts: app
   roles:
     - docker
     - deploy

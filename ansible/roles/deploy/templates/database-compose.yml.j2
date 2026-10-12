@@ -1,16 +1,14 @@
-
 services:
-  postgres:
+  db:
     image: postgres:15-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: votes
+      POSTGRES_PASSWORD: "{{ postgres_password }}"
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
 
 volumes:
-  postgres_data:
+  db-data:
