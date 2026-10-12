@@ -1,6 +1,0 @@
----
-- name: Configure application, backend, and database servers
-  hosts: all
-  become: false
-  roles:
-    - docker
