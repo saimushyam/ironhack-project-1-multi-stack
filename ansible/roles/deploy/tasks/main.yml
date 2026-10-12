@@ -1,0 +1,8 @@
+---
+- name: Verify Docker is available
+  ansible.builtin.command: docker --version
+  changed_when: false
+
+- name: Verify Docker Compose is available
+  ansible.builtin.command: docker compose version
+  changed_when: false
