@@ -1,0 +1,17 @@
+
+services:
+  vote:
+    image: pokfinner/vote:latest
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      REDIS_HOST: "10.0.11.10"
+
+  result:
+    image: pokfinner/result:latest
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      POSTGRES_HOST: "10.0.12.10"
