@@ -1,8 +1,40 @@
----
-- name: Verify Docker is available
-  ansible.builtin.command: docker --version
-  changed_when: false
 
-- name: Verify Docker Compose is available
-  ansible.builtin.command: docker compose version
-  changed_when: false
+---
+- name: Create application deployment directory
+  become: true
+  ansible.builtin.file:
+    path: /opt/voting-app
+    state: directory
+    mode: "0755"
+
+- name: Copy application Compose configuration
+  become: true
+  ansible.builtin.copy:
+    src: app-compose.yml
+    dest: /opt/voting-app/compose.yml
+    mode: "0644"
+  when: "'app' in group_names"
+
+- name: Copy backend Compose configuration
+  become: true
+  ansible.builtin.copy:
+    src: backend-compose.yml
+    dest: /opt/voting-app/compose.yml
+    mode: "0644"
+  when: "'backend' in group_names"
+
+- name: Copy database Compose configuration
+  become: true
+  ansible.builtin.copy:
+    src: database-compose.yml
+    dest: /opt/voting-app/compose.yml
+    mode: "0644"
+  when: "'database' in group_names"
+
+- name: Start application containers
+  become: true
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: /opt/voting-app
+  changed_when: true
+
