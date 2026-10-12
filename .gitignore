@@ -18,3 +18,6 @@ ansible/inventory/hosts.yml
 # Terraform downloaded providers and working directory
 # Terraform state (may contain sensitive values)
 crash.*.log
+
+# Terraform saved plans
+**/tfplan

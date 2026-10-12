@@ -1,18 +1,24 @@
 ---
 - name: Deploy database tier
   hosts: database
+  vars_files:
+    - ../group_vars/all/vault.yml
   roles:
     - docker
     - deploy
 
 - name: Deploy backend tier
   hosts: backend
+  vars_files:
+    - ../group_vars/all/vault.yml
   roles:
     - docker
     - deploy
 
 - name: Deploy application tier
   hosts: app
+  vars_files:
+    - ../group_vars/all/vault.yml
   roles:
     - docker
     - deploy
