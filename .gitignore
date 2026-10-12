@@ -13,3 +13,9 @@
 # Terraform crash logs
 crash.log
 crash.*.logx
+
+# Local Python environment
+.venv/
+
+# Generated Ansible inventory
+ansible/inventory/hosts.yml
