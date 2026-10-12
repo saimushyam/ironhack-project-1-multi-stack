@@ -8,7 +8,13 @@ services:
   worker:
     image: pokfinner/worker:latest
     restart: unless-stopped
-    extra_hosts:
-      - "db:{{ postgres_private_ip }}"
     depends_on:
       - redis
+    environment:
+      REDIS_HOST: redis
+      DB_HOST: db
+      DB_USERNAME: postgres
+      DB_PASSWORD: {{ postgres_password | to_json }}
+      DB_NAME: postgres
+    extra_hosts:
+      - "db:{{ postgres_private_ip }}"
