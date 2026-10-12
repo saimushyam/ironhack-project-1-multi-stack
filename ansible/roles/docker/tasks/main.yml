@@ -1,0 +1,13 @@
+---
+- name: Install Docker
+  become: true
+  ansible.builtin.dnf:
+    name: docker
+    state: present
+
+- name: Enable and start Docker
+  become: true
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
