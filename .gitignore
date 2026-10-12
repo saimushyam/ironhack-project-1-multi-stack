@@ -1,0 +1,15 @@
+# Terraform working directory and downloaded providers
+**/.terraform/*
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Local variable files; keep the example template
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+
+# Terraform crash logs
+crash.log
+crash.*.logx
