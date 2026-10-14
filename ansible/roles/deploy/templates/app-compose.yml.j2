@@ -1,6 +1,6 @@
 services:
   vote:
-    image: pokfinner/vote:latest
+    image: saikamala/vote:v1
     restart: unless-stopped
     ports:
       - "8080:80"
@@ -11,7 +11,7 @@ services:
       - "redis:{{ redis_private_ip }}"
 
   result:
-    image: pokfinner/result:latest
+    image: saikamala/result:v1
     restart: unless-stopped
     ports:
       - "8081:80"

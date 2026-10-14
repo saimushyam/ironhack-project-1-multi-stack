@@ -6,7 +6,7 @@ services:
       - "6379:6379"
 
   worker:
-    image: pokfinner/worker:latest
+    image: saikamala/worker:v1
     restart: unless-stopped
     depends_on:
       - redis
