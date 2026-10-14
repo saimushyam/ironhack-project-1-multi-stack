@@ -308,13 +308,8 @@ resource "aws_lb_listener" "http" {
   protocol          = "HTTP"
 
   default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "Not Found"
-      status_code  = "404"
-    }
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.vote.arn
   }
 }
 
@@ -385,7 +380,7 @@ resource "aws_iam_instance_profile" "ec2" {
 
 # Application server in Availability Zone 1
 resource "aws_instance" "app_1" {
-  ami                         = data.aws_ami.amazon_linux.id
+  ami                         = "ami-03714e87ed2cafc78"
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.public[0].id
   vpc_security_group_ids      = [aws_security_group.app.id]
@@ -401,7 +396,7 @@ resource "aws_instance" "app_1" {
 
 # Application server in Availability Zone 2
 resource "aws_instance" "app_2" {
-  ami                         = data.aws_ami.amazon_linux.id
+  ami                         = "ami-03714e87ed2cafc78"
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.public[1].id
   vpc_security_group_ids      = [aws_security_group.app.id]
@@ -417,7 +412,7 @@ resource "aws_instance" "app_2" {
 
 # Backend server in Availability Zone 1
 resource "aws_instance" "backend_1" {
-  ami                    = data.aws_ami.amazon_linux.id
+  ami                    = "ami-03714e87ed2cafc78"
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.private[0].id
   vpc_security_group_ids = [aws_security_group.backend.id]
@@ -432,7 +427,7 @@ resource "aws_instance" "backend_1" {
 
 # Backend server in Availability Zone 2
 resource "aws_instance" "backend_2" {
-  ami                    = data.aws_ami.amazon_linux.id
+  ami                    = "ami-03714e87ed2cafc78"
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.private[1].id
   vpc_security_group_ids = [aws_security_group.backend.id]
@@ -447,7 +442,7 @@ resource "aws_instance" "backend_2" {
 
 # Database server in Availability Zone 1
 resource "aws_instance" "database_1" {
-  ami                    = data.aws_ami.amazon_linux.id
+  ami                    = "ami-03714e87ed2cafc78"
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.private[0].id
   vpc_security_group_ids = [aws_security_group.database.id]
@@ -462,7 +457,7 @@ resource "aws_instance" "database_1" {
 
 # Database server in Availability Zone 2
 resource "aws_instance" "database_2" {
-  ami                    = data.aws_ami.amazon_linux.id
+  ami                    = "ami-03714e87ed2cafc78"
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.private[1].id
   vpc_security_group_ids = [aws_security_group.database.id]
@@ -509,4 +504,31 @@ resource "aws_route" "private_nat_2" {
   route_table_id         = aws_route_table.private[1].id
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id         = aws_nat_gateway.main.id
+}
+
+
+# Register both application EC2 instances with the Vote target group
+resource "aws_lb_target_group_attachment" "vote_app_1" {
+  target_group_arn = aws_lb_target_group.vote.arn
+  target_id        = aws_instance.app_1.id
+  port             = 8080
+}
+
+resource "aws_lb_target_group_attachment" "vote_app_2" {
+  target_group_arn = aws_lb_target_group.vote.arn
+  target_id        = aws_instance.app_2.id
+  port             = 8080
+}
+
+# Register both application EC2 instances with the Result target group
+resource "aws_lb_target_group_attachment" "result_app_1" {
+  target_group_arn = aws_lb_target_group.result.arn
+  target_id        = aws_instance.app_1.id
+  port             = 8081
+}
+
+resource "aws_lb_target_group_attachment" "result_app_2" {
+  target_group_arn = aws_lb_target_group.result.arn
+  target_id        = aws_instance.app_2.id
+  port             = 8081
 }
