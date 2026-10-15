@@ -1,0 +1,23 @@
+# Terraform working directory and downloaded providers
+**/.terraform/*
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+# Local variable files; keep the example template
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+# Terraform crash logs
+crash.log
+crash.*.logx
+# Local Python environment
+.venv/
+# Generated Ansible inventory
+ansible/inventory/hosts.yml
+# Terraform downloaded providers and working directory
+# Terraform state (may contain sensitive values)
+crash.*.log
+
+# Terraform saved plans
+**/tfplan

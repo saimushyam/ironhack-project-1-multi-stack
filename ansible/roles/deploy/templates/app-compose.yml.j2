@@ -1,0 +1,23 @@
+services:
+  vote:
+    image: saikamala/vote:v1
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+    extra_hosts:
+      - "redis:{{ redis_private_ip }}"
+
+  result:
+    image: saikamala/result:v1
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PG_USER: postgres
+      PG_PASSWORD: {{ postgres_password | to_json }}
+      PG_DATABASE: postgres
+    extra_hosts:
+      - "db:{{ postgres_private_ip }}"
